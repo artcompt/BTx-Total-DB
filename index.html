@@ -1,0 +1,451 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.dash{width:100%;min-height:auto;padding:14px;transition:background .3s,color .3s}
+.dash.dark{background:#1a1e2e;color:#e2e8f0}
+.dash.light{background:#f0f4f8;color:#1e293b}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.title-group h2{font-size:15px;font-weight:500;color:inherit}
+.title-group p{font-size:11px;color:#64748b;margin-top:2px}
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.theme-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;border:0.5px solid #94a3b8;font-size:11px;cursor:pointer;background:transparent;color:inherit}
+.brightness-wrap{display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b}
+.brightness-wrap input[type=range]{width:70px}
+.tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:1.5px solid #cbd5e1}
+.tab{padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;background:transparent;border-top:none;border-left:none;border-right:none;color:#64748b;transition:color .2s,border-color .2s}
+.tab.active{border-bottom-color:#4f46e5;color:#4f46e5}
+.dash.dark .tab.active{border-bottom-color:#818cf8;color:#818cf8}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{background:#fff;border:0.5px solid #e2e8f0;border-radius:10px;padding:12px 14px}
+.dash.dark .kpi{background:#252a3d;border-color:#334155}
+.kpi-label{font-size:11px;color:#64748b;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.kpi-val{font-size:22px;font-weight:500;color:#1e293b}
+.dash.dark .kpi-val{color:#e2e8f0}
+.kpi-sub{font-size:11px;margin-top:3px}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500}
+.badge-up{background:#dcfce7;color:#166534}
+.badge-dn{background:#fee2e2;color:#991b1b}
+.badge-nt{background:#e0e7ff;color:#3730a3}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.card{background:#fff;border:0.5px solid #e2e8f0;border-radius:10px;padding:14px}
+.dash.dark .card{background:#252a3d;border-color:#334155}
+.card-title{font-size:12px;font-weight:500;color:#64748b;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.full-card{background:#fff;border:0.5px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:12px}
+.dash.dark .full-card{background:#252a3d;border-color:#334155}
+canvas{display:block}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:11px;color:#64748b}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend span b{width:10px;height:10px;border-radius:2px;display:inline-block}
+.user-table{width:100%;border-collapse:collapse;font-size:12px}
+.user-table th{text-align:left;padding:6px 8px;color:#64748b;font-weight:500;border-bottom:0.5px solid #e2e8f0;font-size:11px}
+.user-table td{padding:6px 8px;border-bottom:0.5px solid #f1f5f9}
+.dash.dark .user-table th,.dash.dark .user-table td{border-color:#334155}
+.dash.dark .user-table td{color:#cbd5e1}
+.score-bar-wrap{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:3px}
+.dash.dark .score-bar-wrap{background:#334155}
+.score-bar{height:6px;border-radius:3px}
+.alert-list{display:flex;flex-direction:column;gap:7px}
+.alert-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;font-size:11px}
+.alert-red{background:#fef2f2;color:#b91c1c}
+.alert-yellow{background:#fefce8;color:#854d0e}
+.alert-green{background:#f0fdf4;color:#166534}
+.dash.dark .alert-red{background:#3b1515;color:#fca5a5}
+.dash.dark .alert-yellow{background:#2d2300;color:#fde68a}
+.dash.dark .alert-green{background:#0d2b14;color:#86efac}
+.app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.app-item{background:#fff;border:0.5px solid #e2e8f0;border-radius:8px;padding:10px 8px;text-align:center}
+.dash.dark .app-item{background:#252a3d;border-color:#334155}
+.app-icon{width:32px;height:32px;border-radius:8px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.app-name{font-size:10px;font-weight:500;color:#334155;margin-bottom:3px}
+.dash.dark .app-name{color:#cbd5e1}
+.app-score{font-size:13px;font-weight:500}
+.trend-up{color:#16a34a}.trend-dn{color:#dc2626}.trend-nt{color:#6366f1}
+select{padding:4px 8px;border-radius:6px;border:0.5px solid #94a3b8;background:transparent;color:inherit;font-size:11px;cursor:pointer}
+.dash.dark select{background:#252a3d;border-color:#475569;color:#e2e8f0}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-mini{background:#fff;border:0.5px solid #e2e8f0;border-radius:8px;padding:10px 12px;text-align:center}
+.dash.dark .stat-mini{background:#252a3d;border-color:#334155}
+.stat-mini-val{font-size:18px;font-weight:500;color:#4f46e5}
+.dash.dark .stat-mini-val{color:#818cf8}
+.stat-mini-lbl{font-size:10px;color:#64748b;margin-top:2px}
+</style>
+
+<div class="dash light" id="dash">
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden">시니어 두뇌 건강 대시보드 — 40개 앱 활동 기반 인지력 분석 및 건강 보고서</h2>
+
+<div class="top-bar">
+  <div class="title-group">
+    <h2><i class="ti ti-brain" aria-hidden="true" style="color:#4f46e5;font-size:16px;vertical-align:-2px;margin-right:5px"></i>시니어 두뇌 건강 대시보드</h2>
+    <p>마지막 업데이트: 2026년 5월 28일 · 40개 앱 · 데이터 기반 인지건강 리포트</p>
+  </div>
+  <div class="controls">
+    <div class="brightness-wrap">
+      <i class="ti ti-sun" aria-hidden="true" style="font-size:14px"></i>
+      <input type="range" min="60" max="100" value="100" step="1" id="brightness" title="밝기 조절">
+      <span id="bval" style="min-width:28px;font-size:11px">100%</span>
+    </div>
+    <button class="theme-btn" id="themeBtn">
+      <i class="ti ti-moon" aria-hidden="true" style="font-size:13px" id="themeIcon"></i>
+      <span id="themeLabel">다크 모드</span>
+    </button>
+    <select id="period" aria-label="기간 선택">
+      <option>최근 7일</option>
+      <option selected>최근 30일</option>
+      <option>최근 3개월</option>
+      <option>전체</option>
+    </select>
+  </div>
+</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab active" onclick="switchTab('overview',this)" role="tab">종합 현황</button>
+  <button class="tab" onclick="switchTab('cognitive',this)" role="tab">인지 분석</button>
+  <button class="tab" onclick="switchTab('apps',this)" role="tab">앱별 현황</button>
+  <button class="tab" onclick="switchTab('users',this)" role="tab">이용자 관리</button>
+  <button class="tab" onclick="switchTab('report',this)" role="tab">건강 리포트</button>
+</div>
+
+<div class="tab-panel active" id="tab-overview">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label"><i class="ti ti-users" aria-hidden="true" style="font-size:14px;color:#4f46e5"></i>총 이용자</div>
+      <div class="kpi-val">1,284명</div>
+      <div class="kpi-sub"><span class="badge badge-up">▲ 8.3%</span> <span style="font-size:10px;color:#64748b">전월 대비</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label"><i class="ti ti-activity" aria-hidden="true" style="font-size:14px;color:#0ea5e9"></i>평균 인지 점수</div>
+      <div class="kpi-val">72.4점</div>
+      <div class="kpi-sub"><span class="badge badge-up">▲ 3.1pt</span> <span style="font-size:10px;color:#64748b">전월 대비</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label"><i class="ti ti-device-mobile" aria-hidden="true" style="font-size:14px;color:#10b981"></i>일일 평균 세션</div>
+      <div class="kpi-val">3.7회</div>
+      <div class="kpi-sub"><span class="badge badge-nt">→ 0.0</span> <span style="font-size:10px;color:#64748b">전월 동일</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:14px;color:#f59e0b"></i>주의 필요 대상</div>
+      <div class="kpi-val">47명</div>
+      <div class="kpi-sub"><span class="badge badge-dn">▼ 12명</span> <span style="font-size:10px;color:#64748b">전월 대비</span></div>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-line" aria-hidden="true" style="font-size:14px;color:#4f46e5"></i>월별 평균 인지 점수 추이</div>
+      <div style="position:relative;height:170px"><canvas id="trendChart" role="img" aria-label="월별 평균 인지 점수 추이 꺾은선 차트"></canvas></div>
+      <div class="legend">
+        <span><b style="background:#4f46e5"></b>기억력</span>
+        <span><b style="background:#0ea5e9"></b>주의력</span>
+        <span><b style="background:#10b981"></b>지남력</span>
+        <span><b style="background:#f59e0b"></b>언어력</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-radar" aria-hidden="true" style="font-size:14px;color:#8b5cf6"></i>인지 영역별 레이더 차트</div>
+      <div style="position:relative;height:170px"><canvas id="radarChart" role="img" aria-label="6개 인지 영역별 점수 레이더 차트"></canvas></div>
+      <div class="legend">
+        <span><b style="background:#4f46e5"></b>이번 달</span>
+        <span><b style="background:#94a3b8;opacity:.6"></b>지난 달</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row3">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true" style="font-size:14px;color:#0ea5e9"></i>연령대 분포</div>
+      <div style="position:relative;height:140px"><canvas id="ageChart" role="img" aria-label="이용자 연령대 분포 바 차트"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-donut" aria-hidden="true" style="font-size:14px;color:#10b981"></i>위험도 분포</div>
+      <div style="position:relative;height:140px"><canvas id="riskChart" role="img" aria-label="이용자 위험도 분포 도넛 차트"></canvas></div>
+      <div class="legend" style="justify-content:center">
+        <span><b style="background:#10b981"></b>정상 68%</span>
+        <span><b style="background:#f59e0b"></b>경계 28%</span>
+        <span><b style="background:#ef4444"></b>위험 4%</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-bell" aria-hidden="true" style="font-size:14px;color:#ef4444"></i>주요 알림</div>
+      <div class="alert-list">
+        <div class="alert-item alert-red"><i class="ti ti-alert-circle" aria-hidden="true" style="font-size:14px;flex-shrink:0"></i><span>이용자 3명 인지 점수 급락 (7일 내)</span></div>
+        <div class="alert-item alert-yellow"><i class="ti ti-info-circle" aria-hidden="true" style="font-size:14px;flex-shrink:0"></i><span>44명 3일 이상 미접속 상태</span></div>
+        <div class="alert-item alert-green"><i class="ti ti-check" aria-hidden="true" style="font-size:14px;flex-shrink:0"></i><span>이번 달 개선 이용자 127명</span></div>
+        <div class="alert-item alert-yellow"><i class="ti ti-info-circle" aria-hidden="true" style="font-size:14px;flex-shrink:0"></i><span>기억력 게임 오류율 상승 감지</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-cognitive">
+  <div class="stat-row">
+    <div class="stat-mini"><div class="stat-mini-val">74.1</div><div class="stat-mini-lbl">기억력 평균</div></div>
+    <div class="stat-mini"><div class="stat-mini-val">69.8</div><div class="stat-mini-lbl">주의력 평균</div></div>
+    <div class="stat-mini"><div class="stat-mini-val">71.2</div><div class="stat-mini-lbl">지남력 평균</div></div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-mini"><div class="stat-mini-val">78.3</div><div class="stat-mini-lbl">언어력 평균</div></div>
+    <div class="stat-mini"><div class="stat-mini-val">65.9</div><div class="stat-mini-lbl">실행기능 평균</div></div>
+    <div class="stat-mini"><div class="stat-mini-val">72.4</div><div class="stat-mini-lbl">종합 인지지수</div></div>
+  </div>
+  <div class="row2">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true" style="font-size:14px;color:#4f46e5"></i>영역별 점수 분포 (박스플롯형)</div>
+      <div style="position:relative;height:200px"><canvas id="cogBar" role="img" aria-label="6개 인지 영역별 평균·최소·최대 점수 바 차트"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-line" aria-hidden="true" style="font-size:14px;color:#10b981"></i>주간 변화율 (최근 8주)</div>
+      <div style="position:relative;height:200px"><canvas id="weeklyChange" role="img" aria-label="최근 8주간 인지 영역별 변화율 꺾은선 차트"></canvas></div>
+    </div>
+  </div>
+  <div class="full-card">
+    <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true" style="font-size:14px;color:#f59e0b"></i>점수 구간별 이용자 수 분포</div>
+    <div style="position:relative;height:160px"><canvas id="distChart" role="img" aria-label="0~100점 구간별 이용자 수 히스토그램"></canvas></div>
+    <div class="legend" style="margin-top:10px">
+      <span><b style="background:#ef4444"></b>위험(0~49점)</span>
+      <span><b style="background:#f59e0b"></b>경계(50~69점)</span>
+      <span><b style="background:#10b981"></b>정상(70~100점)</span>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-apps">
+  <div class="full-card" style="margin-bottom:10px">
+    <div class="card-title"><i class="ti ti-apps" aria-hidden="true" style="font-size:14px;color:#4f46e5"></i>40개 앱 활동 점수 현황</div>
+    <div class="app-grid" id="appGrid"></div>
+  </div>
+  <div class="row2">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-trophy" aria-hidden="true" style="font-size:14px;color:#f59e0b"></i>앱 카테고리별 평균 점수</div>
+      <div style="position:relative;height:200px"><canvas id="catChart" role="img" aria-label="5개 앱 카테고리별 평균 점수 수평 바 차트"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-area" aria-hidden="true" style="font-size:14px;color:#0ea5e9"></i>앱 사용 빈도 Top 10</div>
+      <div style="position:relative;height:200px"><canvas id="topAppChart" role="img" aria-label="앱 사용 빈도 상위 10개 수평 바 차트"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-users">
+  <div class="full-card">
+    <div class="card-title" style="justify-content:space-between;flex-wrap:wrap;gap:6px">
+      <span><i class="ti ti-users" aria-hidden="true" style="font-size:14px;color:#4f46e5"></i>이용자 목록</span>
+      <select id="riskFilter" aria-label="위험도 필터">
+        <option value="all">전체 위험도</option>
+        <option value="정상">정상</option>
+        <option value="경계">경계</option>
+        <option value="위험">위험</option>
+      </select>
+    </div>
+    <table class="user-table" id="userTable" aria-label="이용자 목록 테이블">
+      <thead>
+        <tr>
+          <th>이름</th><th>나이</th><th>위험도</th><th>종합점수</th><th>기억력</th><th>주의력</th><th>지남력</th><th>마지막 접속</th>
+        </tr>
+      </thead>
+      <tbody id="userTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-report">
+  <div class="row2">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-line" aria-hidden="true" style="font-size:14px;color:#4f46e5"></i>월별 종합 인지지수 추이</div>
+      <div style="position:relative;height:180px"><canvas id="reportTrend" role="img" aria-label="6개월간 종합 인지지수 추이 꺾은선 차트"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-heart-rate-monitor" aria-hidden="true" style="font-size:14px;color:#ef4444"></i>정신건강 지표</div>
+      <div style="position:relative;height:180px"><canvas id="mentalChart" role="img" aria-label="정신건강 5개 지표 수평 바 차트"></canvas></div>
+    </div>
+  </div>
+  <div class="full-card">
+    <div class="card-title"><i class="ti ti-file-text" aria-hidden="true" style="font-size:14px;color:#0ea5e9"></i>이번 달 건강 요약 리포트</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;color:var(--color-text-secondary,#64748b)">
+      <div>
+        <p style="font-size:11px;font-weight:500;color:#4f46e5;margin-bottom:6px">개선 영역</p>
+        <ul style="padding-left:16px;line-height:1.9">
+          <li>기억력: 전월 대비 +4.2점 향상</li>
+          <li>언어력: 꾸준한 상승세 (3개월 연속)</li>
+          <li>정상군 비율 64% → 68% 증가</li>
+          <li>일일 앱 세션 수 3.5 → 3.7회 증가</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-size:11px;font-weight:500;color:#ef4444;margin-bottom:6px">주의 영역</p>
+        <ul style="padding-left:16px;line-height:1.9">
+          <li>실행기능 점수 2.1pt 하락</li>
+          <li>75세 이상 그룹 지남력 저하 감지</li>
+          <li>주간 이탈률 7.4% (목표 5%)</li>
+          <li>고위험군 3명 전문가 연계 필요</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:14px;padding-top:12px;border-top:0.5px solid #e2e8f0">
+      <p style="font-size:11px;font-weight:500;color:#64748b;margin-bottom:8px">인지 영역별 월간 변화</p>
+      <div style="position:relative;height:120px"><canvas id="monthlyDelta" role="img" aria-label="6개 인지 영역 월간 변화량 바 차트"></canvas></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const dash=document.getElementById('dash');
+let isDark=false;
+
+document.getElementById('themeBtn').onclick=function(){
+  isDark=!isDark;
+  dash.className='dash '+(isDark?'dark':'light');
+  document.getElementById('themeLabel').textContent=isDark?'라이트 모드':'다크 모드';
+  document.getElementById('themeIcon').className=isDark?'ti ti-sun':'ti ti-moon';
+  updateAllCharts();
+};
+
+document.getElementById('brightness').oninput=function(){
+  document.getElementById('bval').textContent=this.value+'%';
+  dash.style.filter='brightness('+this.value+'%)';
+};
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  setTimeout(updateAllCharts,50);
+}
+
+function g(dark){return dark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)';}
+function tc(dark){return dark?'#94a3b8':'#64748b';}
+function gridCfg(dark){return{color:g(dark)};}
+
+const months=['12월','1월','2월','3월','4월','5월'];
+const weeks=['1주','2주','3주','4주','5주','6주','7주','8주'];
+
+const charts={};
+function mkChart(id,cfg){
+  const el=document.getElementById(id);
+  if(!el)return null;
+  if(charts[id]){charts[id].destroy();}
+  charts[id]=new Chart(el,cfg);
+  return charts[id];
+}
+
+function updateAllCharts(){
+  const dk=isDark;
+  const tc_=tc(dk);
+
+  mkChart('trendChart',{type:'line',data:{labels:months,datasets:[
+    {label:'기억력',data:[68,70,71,73,72,74],borderColor:'#4f46e5',backgroundColor:'rgba(79,70,229,.08)',tension:.4,pointRadius:3,fill:true},
+    {label:'주의력',data:[65,66,68,69,68,70],borderColor:'#0ea5e9',backgroundColor:'rgba(14,165,233,.08)',tension:.4,pointRadius:3,fill:true},
+    {label:'지남력',data:[70,71,71,72,71,71],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',tension:.4,pointRadius:3,fill:true},
+    {label:'언어력',data:[73,74,75,76,77,78],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',tension:.4,pointRadius:3,fill:true}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:gridCfg(dk),ticks:{color:tc_,font:{size:10}}},y:{min:60,max:85,grid:gridCfg(dk),ticks:{color:tc_,font:{size:10}}}}}});
+
+  mkChart('radarChart',{type:'radar',data:{labels:['기억력','주의력','지남력','언어력','실행기능','정신건강'],datasets:[
+    {label:'이번 달',data:[74,70,71,78,66,73],borderColor:'#4f46e5',backgroundColor:'rgba(79,70,229,.15)',pointBackgroundColor:'#4f46e5',pointRadius:3},
+    {label:'지난 달',data:[70,67,70,76,68,71],borderColor:'#94a3b8',backgroundColor:'rgba(148,163,184,.1)',pointBackgroundColor:'#94a3b8',pointRadius:3}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{min:40,max:100,ticks:{stepSize:20,color:tc_,font:{size:9},backdropColor:'transparent'},grid:{color:g(dk)},angleLines:{color:g(dk)},pointLabels:{color:tc_,font:{size:10}}}}}});
+
+  mkChart('ageChart',{type:'bar',data:{labels:['60~64','65~69','70~74','75~79','80~84','85+'],datasets:[{label:'인원',data:[198,312,356,248,121,49],backgroundColor:['#4f46e5','#6366f1','#818cf8','#a5b4fc','#c7d2fe','#e0e7ff'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tc_,font:{size:9}}},y:{grid:gridCfg(dk),ticks:{color:tc_,font:{size:9}}}}}});
+
+  mkChart('riskChart',{type:'doughnut',data:{labels:['정상','경계','위험'],datasets:[{data:[873,360,51],backgroundColor:['#10b981','#f59e0b','#ef4444'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'68%'}});
+
+  mkChart('cogBar',{type:'bar',data:{labels:['기억력','주의력','지남력','언어력','실행기능','정신건강'],datasets:[
+    {label:'최대',data:[95,92,94,97,89,93],backgroundColor:'rgba(79,70,229,.2)',borderRadius:3,stack:'s'},
+    {label:'평균',data:[74,70,71,78,66,73],backgroundColor:'#4f46e5',borderRadius:3},
+    {label:'최소',data:[42,38,40,45,35,41],backgroundColor:'rgba(239,68,68,.3)',borderRadius:3}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tc_,font:{size:10}}},y:{min:0,max:100,grid:gridCfg(dk),ticks:{color:tc_,font:{size:10}}}}}});
+
+  mkChart('weeklyChange',{type:'line',data:{labels:weeks,datasets:[
+    {label:'기억력',data:[0.2,0.5,0.3,0.8,0.4,0.6,0.9,1.1],borderColor:'#4f46e5',tension:.4,pointRadius:2,fill:false},
+    {label:'주의력',data:[0.1,0.3,0.5,0.2,0.6,0.4,0.7,0.8],borderColor:'#0ea5e9',tension:.4,pointRadius:2,fill:false},
+    {label:'실행기능',data:[-0.2,-0.1,0.2,-0.3,0.1,-0.4,-0.2,-0.5],borderColor:'#ef4444',tension:.4,pointRadius:2,fill:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tc_,font:{size:10}}},y:{grid:gridCfg(dk),ticks:{color:tc_,font:{size:10},callback:v=>v>0?'+'+v.toFixed(1):v.toFixed(1)}}}}});
+
+  mkChart('distChart',{type:'bar',data:{labels:['0~9','10~19','20~29','30~39','40~49','50~59','60~69','70~79','80~89','90~100'],datasets:[{label:'인원수',data:[2,5,11,24,56,148,312,489,198,39],backgroundColor:v=>v.dataIndex<5?'#ef4444':v.dataIndex<7?'#f59e0b':'#10b981',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tc_,font:{size:9}}},y:{grid:gridCfg(dk),ticks:{color:tc_,font:{size:9}}}}}});
+
+  mkChart('catChart',{type:'bar',indexAxis:'y',data:{labels:['기억력 훈련','주의력 훈련','지남력 훈련','언어 인지','실행기능'],datasets:[{label:'평균점수',data:[74,70,71,78,66],backgroundColor:['#4f46e5','#0ea5e9','#10b981','#f59e0b','#ef4444'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:100,grid:gridCfg(dk),ticks:{color:tc_,font:{size:9}}},y:{grid:{display:false},ticks:{color:tc_,font:{size:10}}}}}});
+
+  mkChart('topAppChart',{type:'bar',indexAxis:'y',data:{labels:['색칠공부','단어 맞추기','사진 기억','숫자 나열','퍼즐 맞추기','오늘의 날짜','이름 외우기','방향 따라가기','감정 일기','이야기 순서'],datasets:[{label:'세션수',data:[4821,4210,3987,3812,3654,3290,3100,2980,2840,2710],backgroundColor:'rgba(79,70,229,0.7)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:gridCfg(dk),ticks:{color:tc_,font:{size:9}}},y:{grid:{display:false},ticks:{color:tc_,font:{size:9}}}}}});
+
+  mkChart('reportTrend',{type:'line',data:{labels:months,datasets:[{label:'종합 인지지수',data:[68.1,69.4,70.2,71.0,71.8,72.4],borderColor:'#4f46e5',backgroundColor:'rgba(79,70,229,.1)',tension:.4,pointRadius:4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tc_,font:{size:10}}},y:{min:60,max:80,grid:gridCfg(dk),ticks:{color:tc_,font:{size:10}}}}}});
+
+  mkChart('mentalChart',{type:'bar',indexAxis:'y',data:{labels:['우울 지수','불안 지수','스트레스','사회성','삶의 질'],datasets:[
+    {label:'이번 달',data:[28,32,35,71,74],backgroundColor:'#4f46e5',borderRadius:3,barThickness:10},
+    {label:'지난 달',data:[31,35,37,68,71],backgroundColor:'rgba(148,163,184,.5)',borderRadius:3,barThickness:10}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:100,grid:gridCfg(dk),ticks:{color:tc_,font:{size:9}}},y:{grid:{display:false},ticks:{color:tc_,font:{size:9}}}}}});
+
+  mkChart('monthlyDelta',{type:'bar',data:{labels:['기억력','주의력','지남력','언어력','실행기능','정신건강'],datasets:[{label:'변화량',data:[4.2,2.1,1.0,2.8,-2.1,1.5],backgroundColor:v=>v.raw>=0?'rgba(16,185,129,0.75)':'rgba(239,68,68,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tc_,font:{size:10}}},y:{grid:gridCfg(dk),ticks:{color:tc_,font:{size:10},callback:v=>v>0?'+'+v:v}}}}});
+}
+
+const appData=[
+  {n:'색칠공부',cat:'기억',s:78,t:'up',ico:'🎨'},{n:'단어맞추기',cat:'언어',s:81,t:'up',ico:'📝'},
+  {n:'사진기억',cat:'기억',s:74,t:'up',ico:'📸'},{n:'숫자나열',cat:'주의',s:70,t:'nt',ico:'🔢'},
+  {n:'퍼즐맞추기',cat:'실행',s:67,t:'dn',ico:'🧩'},{n:'오늘날짜',cat:'지남',s:85,t:'up',ico:'📅'},
+  {n:'이름외우기',cat:'기억',s:72,t:'nt',ico:'👤'},{n:'방향따라가기',cat:'지남',s:69,t:'dn',ico:'🧭'},
+  {n:'감정일기',cat:'정신',s:76,t:'up',ico:'💬'},{n:'이야기순서',cat:'언어',s:79,t:'up',ico:'📖'},
+  {n:'블록쌓기',cat:'실행',s:65,t:'dn',ico:'🧱'},{n:'동물맞추기',cat:'기억',s:82,t:'up',ico:'🐾'},
+  {n:'색깔맞추기',cat:'주의',s:73,t:'nt',ico:'🎨'},{n:'단어연상',cat:'언어',s:80,t:'up',ico:'💡'},
+  {n:'경로찾기',cat:'지남',s:66,t:'dn',ico:'🗺️'},{n:'박수패턴',cat:'주의',s:71,t:'nt',ico:'👏'},
+  {n:'계절맞추기',cat:'지남',s:75,t:'up',ico:'🌸'},{n:'전화번호',cat:'기억',s:68,t:'nt',ico:'📞'},
+  {n:'감정인식',cat:'정신',s:77,t:'up',ico:'😊'},{n:'단순덧셈',cat:'실행',s:83,t:'up',ico:'➕'},
+  {n:'악기듣기',cat:'기억',s:74,t:'nt',ico:'🎵'},{n:'나의하루',cat:'정신',s:79,t:'up',ico:'📓'},
+  {n:'모양따라그리기',cat:'실행',s:64,t:'dn',ico:'✏️'},{n:'반대말',cat:'언어',s:78,t:'up',ico:'🔄'},
+  {n:'기억력카드',cat:'기억',s:76,t:'up',ico:'🃏'},{n:'시간읽기',cat:'지남',s:84,t:'up',ico:'⏰'},
+  {n:'숨은그림찾기',cat:'주의',s:69,t:'nt',ico:'🔍'},{n:'요리순서',cat:'실행',s:72,t:'nt',ico:'🍳'},
+  {n:'노래따라부르기',cat:'정신',s:88,t:'up',ico:'🎤'},{n:'스트레칭',cat:'정신',s:82,t:'up',ico:'🧘'},
+  {n:'색상기억',cat:'기억',s:71,t:'nt',ico:'🌈'},{n:'방향지시',cat:'지남',s:68,t:'nt',ico:'➡️'},
+  {n:'낱말퀴즈',cat:'언어',s:80,t:'up',ico:'🔠'},{n:'집중클릭',cat:'주의',s:74,t:'up',ico:'🎯'},
+  {n:'숫자기억',cat:'기억',s:69,t:'dn',ico:'🔢'},{n:'감사일기',cat:'정신',s:85,t:'up',ico:'🌟'},
+  {n:'반응속도',cat:'주의',s:66,t:'dn',ico:'⚡'},{n:'문장완성',cat:'언어',s:77,t:'up',ico:'✍️'},
+  {n:'물건위치',cat:'지남',s:73,t:'nt',ico:'📦'},{n:'계획세우기',cat:'실행',s:63,t:'dn',ico:'📋'}
+];
+
+const ag=document.getElementById('appGrid');
+appData.forEach(a=>{
+  const cl=a.t==='up'?'trend-up':a.t==='dn'?'trend-dn':'trend-nt';
+  const arrow=a.t==='up'?'↑':a.t==='dn'?'↓'?'→':'→':'→';
+  const catColor={기억:'#4f46e5',언어:'#f59e0b',주의:'#0ea5e9',지남:'#10b981',실행:'#8b5cf6',정신:'#ec4899'};
+  const div=document.createElement('div');
+  div.className='app-item';
+  div.innerHTML=`<div class="app-icon" style="background:${catColor[a.cat]}20">${a.ico}</div><div class="app-name">${a.n}</div><div class="app-score ${cl}" style="color:${catColor[a.cat]}">${a.s}점</div>`;
+  ag.appendChild(div);
+});
+
+const users=[
+  {n:'김영자',age:72,risk:'경계',total:61,mem:58,att:62,ori:64,last:'2일 전'},
+  {n:'박성민',age:68,risk:'정상',total:78,mem:80,att:76,ori:79,last:'오늘'},
+  {n:'이순희',age:79,risk:'위험',total:44,mem:40,att:46,ori:47,last:'5일 전'},
+  {n:'최동호',age:65,risk:'정상',total:83,mem:85,att:81,ori:84,last:'어제'},
+  {n:'정미숙',age:74,risk:'경계',total:58,mem:55,att:60,ori:59,last:'3일 전'},
+  {n:'강철수',age:81,risk:'위험',total:41,mem:38,att:42,ori:44,last:'8일 전'},
+  {n:'윤혜진',age:70,risk:'정상',total:75,mem:77,att:73,ori:76,last:'오늘'},
+  {n:'임재현',age:77,risk:'경계',total:55,mem:52,att:57,ori:57,last:'4일 전'},
+  {n:'오선영',age:63,risk:'정상',total:88,mem:90,att:86,ori:89,last:'오늘'},
+  {n:'서태봉',age:83,risk:'위험',total:39,mem:36,att:40,ori:41,last:'12일 전'},
+];
+
+function renderUsers(filter='all'){
+  const tb=document.getElementById('userTbody');
+  tb.innerHTML='';
+  const riskColor={정상:'#10b981',경계:'#f59e0b',위험:'#ef4444'};
+  users.filter(u=>filter==='all'||u.risk===filter).forEach(u=>{
+    const pct=u.total+'%';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:500">${u.n}</td><td style="color:#64748b">${u.age}세</td>
+    <td><span class="badge" style="background:${riskColor[u.risk]}20;color:${riskColor[u.risk]}">${u.risk}</span></td>
+    <td><span style="font-size:13px;font-weight:500;color:${riskColor[u.risk]}">${u.total}점</span><div class="score-bar-wrap"><div class="score-bar" style="width:${pct};background:${riskColor[u.risk]}"></div></div></td>
+    <td>${u.mem}</td><td>${u.att}</td><td>${u.ori}</td>
+    <td style="color:#94a3b8;font-size:11px">${u.last}</td>`;
+    tb.appendChild(tr);
+  });
+}
+renderUsers();
+document.getElementById('riskFilter').onchange=function(){renderUsers(this.value);};
+
+setTimeout(updateAllCharts,100);
+</script>
